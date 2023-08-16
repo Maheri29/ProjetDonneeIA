@@ -1,0 +1,45 @@
+#datetime
+from datetime import timedelta, datetime
+
+# The DAG object
+from airflow import DAG
+
+# Operators
+from airflow.operators.dummy_operator import DummyOperator
+from airflow.operators.python_operator import PythonOperator
+from extract import create_extract
+from transform import create_transform
+from load import create_load
+
+# initializing the default arguments
+default_args = {
+		'owner': 'Ranga',
+		'start_date': datetime(2023, 8, 16),
+		'retries': 0,
+		'retry_delay': timedelta(minutes=5)
+}
+
+# Instantiate a DAG object
+hello_world_dag = DAG('hello_world_dag',
+		default_args=default_args,
+		description='Hello World DAG',
+		schedule_interval=None, 
+		catchup=False,
+		tags=['example, helloworld']
+)
+
+# python callable function
+def print_hello():
+		return 'Hello World!'
+
+# Creating first task
+extract = create_extract(hello_world_dag)
+
+# Creating second task
+transform = create_transform(hello_world_dag)
+
+# Creating third task
+load = create_load(hello_world_dag)
+
+# Set the order of execution of tasks. 
+extract >> transform >> load
